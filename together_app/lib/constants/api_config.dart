@@ -1,7 +1,6 @@
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart';
-
 class ApiConfig {
+  // Live deployed Render production backend
+  static const String productionUrl = 'https://together-z41x.onrender.com';
   static String _customBaseUrl = '';
 
   static void setCustomBaseUrl(String url) {
@@ -9,19 +8,11 @@ class ApiConfig {
   }
 
   static String get defaultHost {
-    // Allows embedding production URL during build: flutter build apk --dart-define=BACKEND_URL=https://your-api.koyeb.app
     const envUrl = String.fromEnvironment('BACKEND_URL');
     if (envUrl.isNotEmpty) {
       return envUrl;
     }
-
-    if (kIsWeb) return 'http://localhost:4000';
-    try {
-      if (Platform.isAndroid) {
-        return 'http://10.0.2.2:4000';
-      }
-    } catch (_) {}
-    return 'http://localhost:4000';
+    return productionUrl;
   }
 
   static String get baseUrl {
