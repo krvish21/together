@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../constants/api_config.dart';
 import '../models/couple_model.dart';
@@ -12,9 +14,24 @@ import '../models/journal_model.dart';
 import '../models/wishlist_model.dart';
 
 class ApiService {
+  static const Duration _timeoutDuration = Duration(seconds: 25);
+
   static Map<String, String> get _headers => {
     'Content-Type': 'application/json',
   };
+
+  static String _formatNetworkError(dynamic error) {
+    if (error is TimeoutException) {
+      return 'Connection timed out connecting to ${ApiConfig.baseUrl}.\n'
+          '• If using Render free tier, the server may take ~30-40s to wake up from cold sleep. Please wait 10s and tap again!\n'
+          '• If running on a physical phone, make sure your server URL in settings points to your Render URL or your computer\'s Wi-Fi IP (not localhost or 10.0.2.2).';
+    }
+    if (error is SocketException) {
+      return 'Cannot reach server at ${ApiConfig.baseUrl}.\n'
+          'Please verify your server is running and the Server URL in settings is correct.';
+    }
+    return error.toString().replaceAll('Exception: ', '');
+  }
 
   // COUPLE
   static Future<Map<String, dynamic>> createCouple({
@@ -23,49 +40,63 @@ class ApiService {
     String? relationshipStatus,
     String? themeColor,
   }) async {
-    final uri = Uri.parse('${ApiConfig.baseUrl}/api/couples/create');
-    final resp = await http.post(
-      uri,
-      headers: _headers,
-      body: jsonEncode({
-        'partner1Name': partner1Name,
-        'anniversaryDate': anniversaryDate,
-        'relationshipStatus': relationshipStatus,
-        'themeColor': themeColor,
-      }),
-    );
-    if (resp.statusCode >= 200 && resp.statusCode < 300) {
-      return jsonDecode(resp.body);
+    try {
+      final uri = Uri.parse('${ApiConfig.baseUrl}/api/couples/create');
+      final resp = await http.post(
+        uri,
+        headers: _headers,
+        body: jsonEncode({
+          'partner1Name': partner1Name,
+          'anniversaryDate': anniversaryDate,
+          'relationshipStatus': relationshipStatus,
+          'themeColor': themeColor,
+        }),
+      ).timeout(_timeoutDuration);
+
+      if (resp.statusCode >= 200 && resp.statusCode < 300) {
+        return jsonDecode(resp.body);
+      }
+      throw Exception(jsonDecode(resp.body)['error'] ?? 'Failed to create couple space');
+    } catch (e) {
+      throw Exception(_formatNetworkError(e));
     }
-    throw Exception(jsonDecode(resp.body)['error'] ?? 'Failed to create couple space');
   }
 
   static Future<Map<String, dynamic>> joinCouple({
     required String spaceCode,
     required String partner2Name,
   }) async {
-    final uri = Uri.parse('${ApiConfig.baseUrl}/api/couples/join');
-    final resp = await http.post(
-      uri,
-      headers: _headers,
-      body: jsonEncode({
-        'spaceCode': spaceCode,
-        'partner2Name': partner2Name,
-      }),
-    );
-    if (resp.statusCode >= 200 && resp.statusCode < 300) {
-      return jsonDecode(resp.body);
+    try {
+      final uri = Uri.parse('${ApiConfig.baseUrl}/api/couples/join');
+      final resp = await http.post(
+        uri,
+        headers: _headers,
+        body: jsonEncode({
+          'spaceCode': spaceCode,
+          'partner2Name': partner2Name,
+        }),
+      ).timeout(_timeoutDuration);
+
+      if (resp.statusCode >= 200 && resp.statusCode < 300) {
+        return jsonDecode(resp.body);
+      }
+      throw Exception(jsonDecode(resp.body)['error'] ?? 'Failed to join couple space');
+    } catch (e) {
+      throw Exception(_formatNetworkError(e));
     }
-    throw Exception(jsonDecode(resp.body)['error'] ?? 'Failed to join couple space');
   }
 
   static Future<CoupleModel> getCouple(String coupleId) async {
-    final uri = Uri.parse('${ApiConfig.baseUrl}/api/couples/$coupleId');
-    final resp = await http.get(uri);
-    if (resp.statusCode == 200) {
-      return CoupleModel.fromJson(jsonDecode(resp.body));
+    try {
+      final uri = Uri.parse('${ApiConfig.baseUrl}/api/couples/$coupleId');
+      final resp = await http.get(uri).timeout(_timeoutDuration);
+      if (resp.statusCode == 200) {
+        return CoupleModel.fromJson(jsonDecode(resp.body));
+      }
+      throw Exception('Failed to fetch couple');
+    } catch (e) {
+      throw Exception(_formatNetworkError(e));
     }
-    throw Exception('Failed to fetch couple');
   }
 
   static Future<CoupleModel> updateCouple({
