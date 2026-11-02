@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Together needs access to your photos to preserve couple memories and scrapbook entries.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Together needs camera access to capture couple memories.</string>
 </dict>
 </plist>
