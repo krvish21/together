@@ -1,11 +1,11 @@
 {
-    "name": "together_app",
-    "short_name": "together_app",
+    "name": "Together - Couples Companion",
+    "short_name": "Together ❤️",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#FFF0F3",
+    "theme_color": "#FF5E7E",
+    "description": "A private space for communication, playful interactions, shared planning and preserving memories.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

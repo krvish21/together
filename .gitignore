@@ -1,0 +1,10 @@
+server/data/
+server/uploads/
+server/.env
+together_app/build/
+together_app/.dart_tool/
+together_app/.flutter-plugins
+together_app/.flutter-plugins-dependencies
+*.iml
+.idea/
+.DS_Store

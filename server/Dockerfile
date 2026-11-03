@@ -5,8 +5,9 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production
 
-# Copy application source
+# Copy application source & web app
 COPY src/ ./src/
+COPY public/ ./public/
 
 # Create persistent storage and media upload directories
 RUN mkdir -p data uploads
